@@ -3,6 +3,7 @@ package sbparam
 import (
 	"fmt"
 	"gopkg.in/sensorbee/sensorbee.v0/data"
+	"math"
 	"reflect"
 	"strings"
 )
@@ -50,22 +51,65 @@ func Unmarshal(dat data.Map, v interface{}) error {
 				return fmt.Errorf("key '%v' is not found in param", keyName)
 			}
 		}
+		ps := paramSet{
+			key:      keyName,
+			required: required,
+			defValue: defValue,
+		}
 		switch field.Type.Kind() {
 		case reflect.String:
-			var value string
-			if dataPathErr != nil {
-				value = defValue
-			} else if dataValue, err := data.AsString(dv); err == nil {
-				value = dataValue
-			} else {
-				if required {
-					return fmt.Errorf("type mismatch, key '%v' is not '%v'",
-						keyName, field.Type)
-				}
-				value = defValue
+			value, err := decodeString(dv, ps)
+			if err != nil {
+				return err
 			}
 			ptr := structValue.Addr().Interface().(*string)
 			*ptr = value
+
+		case reflect.Int:
+			value, err := decodeInt(dv, ps)
+			if err != nil {
+				return err
+			}
+			ptr := structValue.Addr().Interface().(*int)
+			*ptr = int(value)
+		case reflect.Int8:
+			value, err := decodeInt(dv, ps)
+			if err != nil {
+				return err
+			}
+			if value > math.MaxInt8 || value < math.MinInt8 {
+				return fmt.Errorf("int8 value is overflow: %d", value)
+			}
+			ptr := structValue.Addr().Interface().(*int8)
+			*ptr = int8(value)
+		case reflect.Int16:
+			value, err := decodeInt(dv, ps)
+			if err != nil {
+				return err
+			}
+			if value > math.MaxInt16 || value < math.MinInt16 {
+				return fmt.Errorf("int16 value is overflow: %d", value)
+			}
+			ptr := structValue.Addr().Interface().(*int16)
+			*ptr = int16(value)
+		case reflect.Int32:
+			value, err := decodeInt(dv, ps)
+			if err != nil {
+				return err
+			}
+			if value > math.MaxInt32 || value < math.MinInt32 {
+				return fmt.Errorf("int32 value is overflow: %d", value)
+			}
+			ptr := structValue.Addr().Interface().(*int32)
+			*ptr = int32(value)
+		case reflect.Int64:
+			value, err := decodeInt(dv, ps)
+			if err != nil {
+				return err
+			}
+			ptr := structValue.Addr().Interface().(*int64)
+			*ptr = value
+
 		}
 	}
 	return nil
