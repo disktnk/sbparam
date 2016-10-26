@@ -102,3 +102,26 @@ func decodeFloat(dv data.Value, ps paramSet) (float64, error) {
 	}
 	return value, nil
 }
+
+func decodeBool(dv data.Value, ps paramSet) (bool, error) {
+	var value bool
+	if dv == nil {
+		defBool, err := strconv.ParseBool(ps.defValue)
+		if err != nil {
+			return false, fmt.Errorf("default value is not 'bool': %v", err)
+		}
+		value = defBool
+	} else if dataValue, err := data.AsBool(dv); err == nil {
+		value = dataValue
+	} else {
+		if ps.required {
+			return false, fmt.Errorf("type mismatch, key '%v' is not 'bool'", ps.key)
+		}
+		defBool, err := strconv.ParseBool(ps.defValue)
+		if err != nil {
+			return false, fmt.Errorf("default value is not 'bool': %v", err)
+		}
+		value = defBool
+	}
+	return value, nil
+}

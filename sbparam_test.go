@@ -334,3 +334,59 @@ func TestUnmarshalFloatError(t *testing.T) {
 		}
 	}
 }
+
+type testBoolValue struct {
+	BoolField1 bool
+	BoolField2 bool `sbparam:",,true"`
+}
+
+func TestUnmarshalBool(t *testing.T) {
+	d1 := data.Map{
+		"BoolField1": data.False,
+	}
+
+	actual := &testBoolValue{}
+
+	if err := Unmarshal(d1, actual); err != nil {
+		t.Fatalf("failed to unmarshal: %v\n", err)
+	}
+	expected := &testBoolValue{
+		BoolField1: false,
+		BoolField2: true,
+	}
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("faild to unmarshal\n%v\nis expected to equals\n%v\n",
+			actual, expected)
+	}
+}
+
+func TestUnmarshalBoolError(t *testing.T) {
+	type testSet struct {
+		title  string
+		in     data.Map
+		format interface{}
+	}
+	testCases := []testSet{
+		testSet{
+			title: "data type mismatch",
+			in: data.Map{
+				"BoolField1": data.Int(0),
+			},
+			format: &struct{ BoolField1 bool }{},
+		},
+		testSet{
+			title: "default value type mismatch",
+			in:    data.Map{},
+			format: &struct {
+				BoolField1 bool `sbparam:",,a"`
+			}{},
+		},
+	}
+
+	for _, c := range testCases {
+		actual := c.format
+		if err := Unmarshal(c.in, actual); err == nil {
+			t.Fatalf("test case '%v' should occur an error but nothing", c.title)
+		}
+	}
+}

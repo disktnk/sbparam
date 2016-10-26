@@ -178,7 +178,15 @@ func Unmarshal(dat data.Map, v interface{}) error {
 				return err
 			}
 			ptr := structValue.Addr().Interface().(*float64)
-			*ptr = float64(value)
+			*ptr = value
+
+		case reflect.Bool:
+			value, err := decodeBool(dv, ps)
+			if err != nil {
+				return err
+			}
+			ptr := structValue.Addr().Interface().(*bool)
+			*ptr = value
 
 		}
 	}
