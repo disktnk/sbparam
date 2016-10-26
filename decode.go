@@ -43,14 +43,39 @@ func decodeInt(dv data.Value, ps paramSet) (int64, error) {
 		value = dataValue
 	} else {
 		if ps.required {
-			return 0, fmt.Errorf("type mismatch, key '%v' is not 'int'",
-				ps.key)
+			return 0, fmt.Errorf("type mismatch, key '%v' is not 'int'", ps.key)
 		}
 		defInt, err := strconv.ParseInt(ps.defValue, 10, 64)
 		if err != nil {
 			return 0, fmt.Errorf("default value is not 'int': %v", err)
 		}
 		value = defInt
+	}
+	return value, nil
+}
+
+func decodeUint(dv data.Value, ps paramSet) (uint64, error) {
+	var value uint64
+	if dv == nil {
+		defUint, err := strconv.ParseUint(ps.defValue, 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("default value is not 'uint': %v", err)
+		}
+		value = defUint
+	} else if dataValue, err := data.AsInt(dv); err == nil {
+		if dataValue < 0 {
+			return 0, fmt.Errorf("value is not 'uint': %d", dataValue)
+		}
+		value = uint64(dataValue)
+	} else {
+		if ps.required {
+			return 0, fmt.Errorf("type mismatch, key '%v' is not 'int'", ps.key)
+		}
+		defUint, err := strconv.ParseUint(ps.defValue, 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("default value is not 'uint': %v", err)
+		}
+		value = defUint
 	}
 	return value, nil
 }

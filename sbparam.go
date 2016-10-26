@@ -78,7 +78,8 @@ func Unmarshal(dat data.Map, v interface{}) error {
 				return err
 			}
 			if value > math.MaxInt8 || value < math.MinInt8 {
-				return fmt.Errorf("int8 value is overflow: %d", value)
+				return fmt.Errorf("'%v'(int8) overflow error: %d", keyName,
+					value)
 			}
 			ptr := structValue.Addr().Interface().(*int8)
 			*ptr = int8(value)
@@ -88,7 +89,8 @@ func Unmarshal(dat data.Map, v interface{}) error {
 				return err
 			}
 			if value > math.MaxInt16 || value < math.MinInt16 {
-				return fmt.Errorf("int16 value is overflow: %d", value)
+				return fmt.Errorf("'%v'(int16) overflow error: %d", keyName,
+					value)
 			}
 			ptr := structValue.Addr().Interface().(*int16)
 			*ptr = int16(value)
@@ -98,7 +100,8 @@ func Unmarshal(dat data.Map, v interface{}) error {
 				return err
 			}
 			if value > math.MaxInt32 || value < math.MinInt32 {
-				return fmt.Errorf("int32 value is overflow: %d", value)
+				return fmt.Errorf("'%v'(int32) overflow error: %d", keyName,
+					value)
 			}
 			ptr := structValue.Addr().Interface().(*int32)
 			*ptr = int32(value)
@@ -109,6 +112,54 @@ func Unmarshal(dat data.Map, v interface{}) error {
 			}
 			ptr := structValue.Addr().Interface().(*int64)
 			*ptr = value
+
+		case reflect.Uint:
+			value, err := decodeUint(dv, ps)
+			if err != nil {
+				return err
+			}
+			ptr := structValue.Addr().Interface().(*uint)
+			*ptr = uint(value)
+		case reflect.Uint8:
+			value, err := decodeUint(dv, ps)
+			if err != nil {
+				return err
+			}
+			if value > math.MaxUint8 {
+				return fmt.Errorf("'%v'(uint8) overflow error: %d", keyName,
+					value)
+			}
+			ptr := structValue.Addr().Interface().(*uint8)
+			*ptr = uint8(value)
+		case reflect.Uint16:
+			value, err := decodeUint(dv, ps)
+			if err != nil {
+				return err
+			}
+			if value > math.MaxUint16 {
+				return fmt.Errorf("'%v'(uint16) overflow error: %d", keyName,
+					value)
+			}
+			ptr := structValue.Addr().Interface().(*uint16)
+			*ptr = uint16(value)
+		case reflect.Uint32:
+			value, err := decodeUint(dv, ps)
+			if err != nil {
+				return err
+			}
+			if value > math.MaxUint32 {
+				return fmt.Errorf("'%v'(uint32) overflow error: %d", keyName,
+					value)
+			}
+			ptr := structValue.Addr().Interface().(*uint32)
+			*ptr = uint32(value)
+		case reflect.Uint64:
+			value, err := decodeUint(dv, ps)
+			if err != nil {
+				return err
+			}
+			ptr := structValue.Addr().Interface().(*uint64)
+			*ptr = uint64(value)
 
 		}
 	}
