@@ -161,6 +161,25 @@ func Unmarshal(dat data.Map, v interface{}) error {
 			ptr := structValue.Addr().Interface().(*uint64)
 			*ptr = uint64(value)
 
+		case reflect.Float32:
+			value, err := decodeFloat(dv, ps)
+			if err != nil {
+				return err
+			}
+			if math.Abs(value) > math.MaxFloat32 {
+				return fmt.Errorf("'%v'(float32) overflow error: %f", keyName,
+					value)
+			}
+			ptr := structValue.Addr().Interface().(*float32)
+			*ptr = float32(value)
+		case reflect.Float64:
+			value, err := decodeFloat(dv, ps)
+			if err != nil {
+				return err
+			}
+			ptr := structValue.Addr().Interface().(*float64)
+			*ptr = float64(value)
+
 		}
 	}
 	return nil

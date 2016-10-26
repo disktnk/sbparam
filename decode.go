@@ -79,3 +79,26 @@ func decodeUint(dv data.Value, ps paramSet) (uint64, error) {
 	}
 	return value, nil
 }
+
+func decodeFloat(dv data.Value, ps paramSet) (float64, error) {
+	var value float64
+	if dv == nil {
+		defFloat, err := strconv.ParseFloat(ps.defValue, 64)
+		if err != nil {
+			return 0.0, fmt.Errorf("default value is not 'float': %v", err)
+		}
+		value = defFloat
+	} else if dataValue, err := data.AsFloat(dv); err == nil {
+		value = dataValue
+	} else {
+		if ps.required {
+			return 0.0, fmt.Errorf("type mismatch, key '%v' is not 'float'", ps.key)
+		}
+		defFloat, err := strconv.ParseFloat(ps.defValue, 64)
+		if err != nil {
+			return 0.0, fmt.Errorf("default value is not 'float': %v", err)
+		}
+		value = defFloat
+	}
+	return value, nil
+}

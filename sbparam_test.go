@@ -268,3 +268,69 @@ func TestUnmarshalUintError(t *testing.T) {
 		}
 	}
 }
+
+type testFloatValue struct {
+	Float32Field  float32
+	Float32Field2 float32 `sbparam:",,0.1"`
+	Float64Field  float64
+}
+
+func TestUnmarshalFloat(t *testing.T) {
+	d1 := data.Map{
+		"Float32Field": data.Float(math.MaxFloat32),
+		"Float64Field": data.Float(math.MaxFloat64),
+	}
+
+	actual := &testFloatValue{}
+
+	if err := Unmarshal(d1, actual); err != nil {
+		t.Fatalf("failed to unmarshal: %v\n", err)
+	}
+	expected := &testFloatValue{
+		Float32Field:  math.MaxFloat32,
+		Float32Field2: 0.1,
+		Float64Field:  math.MaxFloat64,
+	}
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("faild to unmarshal\n%v\nis expected to equals\n%v\n",
+			actual, expected)
+	}
+}
+
+func TestUnmarshalFloatError(t *testing.T) {
+	type testSet struct {
+		title  string
+		in     data.Map
+		format interface{}
+	}
+	testCases := []testSet{
+		testSet{
+			title: "data type mismatch",
+			in: data.Map{
+				"FloatField": data.String("error"),
+			},
+			format: &struct{ FloatField float32 }{},
+		},
+		testSet{
+			title: "default value type mismatch",
+			in:    data.Map{},
+			format: &struct {
+				FloatField float32 `sbparam:",,a"`
+			}{},
+		},
+		testSet{
+			title: "float32 value overflow",
+			in: data.Map{
+				"FloatField": data.Float(math.MaxFloat64),
+			},
+			format: &struct{ FloatField float32 }{},
+		},
+	}
+
+	for _, c := range testCases {
+		actual := c.format
+		if err := Unmarshal(c.in, actual); err == nil {
+			t.Fatalf("test case '%v' should occur an error but nothing", c.title)
+		}
+	}
+}
